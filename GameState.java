@@ -12,7 +12,7 @@ import java.io.FileWriter;
  * @author Dan DiTursi
  * @version 11 February 2023
  */
-public class GameState
+public class GameState implements Comparable<GameState>
 {
     // instance variables - replace the example below with your own
     private ArrayList<Card> cells; // Numbered from 0-3; empty cells will always be last
@@ -96,6 +96,7 @@ public class GameState
             }
             tableau.add(pile);
         }
+        sc.close();
     }
     
     // Note: Modifies internal state; no "undo" available
@@ -322,5 +323,24 @@ public class GameState
     
     public boolean isLoss() {
         return !isWin() && gameover();
+    }
+
+    @Override
+    public int compareTo(GameState o) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /*
+     * Heuristic function. For now, states with more cards
+     * in the foundation pile will receive lower (better) 
+     * scores
+     */
+    public int h() {
+        int cardsAway = 0;
+        for (int f: foundations) {
+            cardsAway += f;
+        }
+        return (52 - cardsAway) * 52;
     }
 }
