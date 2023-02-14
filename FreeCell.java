@@ -10,7 +10,7 @@ public class FreeCell
 {
     public FreeCell() {}
 
-    public static void main() {
+    public static void main(String[] args) {
         GameState game = new GameState();
         game.display();
         ArrayList<Action> moves = game.getLegalActions();
@@ -35,4 +35,10 @@ public class FreeCell
         }
         
     }
+
+    public ArrayList<Action> solve(GameState gs) {
+        return null;
+    }
+
+    
 }
