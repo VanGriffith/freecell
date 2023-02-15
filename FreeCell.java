@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 /**
  * Driver class for the Freecell game.
@@ -40,5 +41,27 @@ public class FreeCell
         return null;
     }
 
-    
+
+    private ArrayList<Action> AStarSolve(GameState start) {
+        PriorityQueue<GameState> pQueue = new PriorityQueue<GameState>();
+        
+        pQueue.offer(start);
+        while (!pQueue.isEmpty()) {
+            GameState gs = pQueue.poll();
+            if (gs.isWin()) {
+                System.out.printf("You wont in %d moves! %n", gs.getNumSteps());
+            }
+            else {
+                ArrayList<Action> actions = gs.getLegalActions();
+                for (Action a: actions) {
+                    pQueue.offer(gs.nextState(a));
+                }
+            }
+        }
+        
+        
+        return null;
+    }
+
+
 }
