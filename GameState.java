@@ -19,6 +19,7 @@ public class GameState implements Comparable<GameState>
     private int numCellsFree;
     private ArrayList<ArrayList<Card>> tableau; // In actions, numbered 1-8; we adjust the -1 manually.
     private int[] foundations = {0,0,0,0,0}; // We'll ignore the first one.
+    private int numSteps = 0;
 
     /**
      * Creates a random deal
@@ -123,6 +124,8 @@ public class GameState implements Comparable<GameState>
             ArrayList<Card> p2 = tableau.get(d-1);
             p2.add(c);
         }
+        numSteps++;
+
         return true;
     }
         
@@ -327,20 +330,26 @@ public class GameState implements Comparable<GameState>
 
     @Override
     public int compareTo(GameState o) {
-        // TODO Auto-generated method stub
-        return 0;
+        return numSteps + h();
     }
 
     /*
      * Heuristic function. For now, states with more cards
      * in the foundation pile will receive lower (better) 
      * scores
+     * 
+     * Other ideas:
+     *  - Variety of cards on bottom row of tableau
      */
     public int h() {
         int cardsAway = 0;
         for (int f: foundations) {
             cardsAway += f;
         }
-        return (52 - cardsAway) * 52;
+        return (52 - cardsAway) * 10;
+    }
+
+    public int getNumSteps() {
+        return numSteps;
     }
 }
