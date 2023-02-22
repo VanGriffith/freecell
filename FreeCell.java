@@ -1,3 +1,4 @@
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
@@ -12,8 +13,26 @@ public class FreeCell
     public FreeCell() {}
 
     public static void main(String[] args) {
+        
         GameState game = new GameState();
+        try {
+            String fileName = "";
+            if (args.length > 0) fileName = args[0]; 
+            game = new GameState(fileName);
+
+        } catch (FileNotFoundException e) {
+            System.err.println("File Not Found, using random gamestate");
+
+        }
         game.display();
+        
+        try {
+            AStarSolve(game);
+        } catch (OutOfMemoryError e) {
+            System.err.println("Out of Memory");
+        }
+
+        /* 
         ArrayList<Action> moves = game.getLegalActions();
         for (Action a : moves) {
             System.out.println(a.toDisplayString());
@@ -34,7 +53,7 @@ public class FreeCell
         for (Action a : moves) {
             System.out.println(a.toDisplayString());
         }
-        
+        */
     }
 
     public ArrayList<Action> solve(GameState gs) {
@@ -42,14 +61,14 @@ public class FreeCell
     }
 
 
-    private ArrayList<Action> AStarSolve(GameState start) {
+    private static ArrayList<Action> AStarSolve(GameState start) {
         PriorityQueue<GameState> pQueue = new PriorityQueue<GameState>();
-        
         pQueue.offer(start);
         while (!pQueue.isEmpty()) {
             GameState gs = pQueue.poll();
             if (gs.isWin()) {
-                System.out.printf("You wont in %d moves! %n", gs.getNumSteps());
+                System.out.printf("You won in %d moves!%n", gs.getNumSteps());
+                return null;
             }
             else {
                 ArrayList<Action> actions = gs.getLegalActions();
@@ -58,10 +77,6 @@ public class FreeCell
                 }
             }
         }
-        
-        
         return null;
     }
-
-
 }

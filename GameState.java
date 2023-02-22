@@ -20,6 +20,7 @@ public class GameState implements Comparable<GameState>
     private ArrayList<ArrayList<Card>> tableau; // In actions, numbered 1-8; we adjust the -1 manually.
     private int[] foundations = {0,0,0,0,0}; // We'll ignore the first one.
     private int numSteps = 0;
+    private int score;
 
     /**
      * Creates a random deal
@@ -47,12 +48,15 @@ public class GameState implements Comparable<GameState>
             }
             tableau.add(current);
         }
+
+        this.setScore();
     }
     
     public GameState(GameState gs) {
         cells = new ArrayList<Card>(4);
         for (Card c : gs.cells) { cells.add(c); }
         numCellsFree = gs.numCellsFree;
+        numSteps = gs.numSteps;
         tableau = new ArrayList<ArrayList<Card>>(8);
         for (int i = 0; i < 8; i++) {
             ArrayList<Card> current = new ArrayList<Card>();
@@ -63,6 +67,8 @@ public class GameState implements Comparable<GameState>
         for (int i = 0; i < 5; i++) {
             foundations[i] = gs.foundations[i];
         }
+
+        this.setScore();
     }
     
     // Note: input string must be full file path, unless file is in current working directory
@@ -97,6 +103,7 @@ public class GameState implements Comparable<GameState>
             }
             tableau.add(pile);
         }
+        this.setScore();
         sc.close();
     }
     
@@ -125,6 +132,7 @@ public class GameState implements Comparable<GameState>
             p2.add(c);
         }
         numSteps++;
+        this.setScore();
 
         return true;
     }
@@ -149,6 +157,7 @@ public class GameState implements Comparable<GameState>
         }
         else {
             pile = tableau.get(d-1);
+            if (pile.size() == 0) { return true; }
             Card last = pile.get(pile.size()-1);
             return (last.getRank() == c.getRank() + 1) && (!last.sameColor(c));
         }
@@ -170,9 +179,9 @@ public class GameState implements Comparable<GameState>
         }
         
         // Moves to tableau
+        boolean foundEmpty = false;
         for (int d = 0; d < 8; d++) {
             ArrayList<Card> pile = tableau.get(d);
-            
             // non-empty pile - check all movable cards to see if they can go here.
             if (pile.size() > 0) {
                 Card top = pile.get(pile.size() - 1);
@@ -185,6 +194,7 @@ public class GameState implements Comparable<GameState>
                 for (int s = 0; s < 8; s++) {
                     if (s == d) { continue; }
                     ArrayList<Card> p2 = tableau.get(s);
+                    if (p2.size() == 0) { continue; }
                     Card c2 = p2.get(p2.size()-1);
                     if (!top.sameColor(c2) && (top.getRank() == c2.getRank()+1)) {
                         result.add(new Action(false,s+1,c2,d+1));
@@ -192,16 +202,23 @@ public class GameState implements Comparable<GameState>
                 }
             }
             else {  // empty pile - any card can go here
-                for (int s = 0; s<cells.size(); s++) {
-                    result.add(new Action(true,s,cells.get(s),d+1));
-                }
-                for (int s = 0; s < 8; s++) {
-                    if (s == d) { continue; }
-                    ArrayList<Card> p2 = tableau.get(s);
-                    result.add(new Action(false,s+1,p2.get(p2.size()-1),d+1));
+                if (!foundEmpty) {
+                    foundEmpty = true;
+                    for (int s = 0; s<cells.size(); s++) {
+                        result.add(new Action(true,s,cells.get(s),d+1));
+                    }
+                    for (int s = 0; s < 8; s++) {
+                        if (s == d) { continue; }
+                        ArrayList<Card> p2 = tableau.get(s);
+                        // No point in moving a single card from one tableau pile to an empty space
+                        if (p2.size() >= 2) {
+                            result.add(new Action(false,s+1,p2.get(p2.size()-1),d+1));
+                        }
+                    }
                 }
             }
         }
+
         
         // Moves to foundation
         for (int s = 0; s<cells.size(); s++) {
@@ -328,28 +345,50 @@ public class GameState implements Comparable<GameState>
         return !isWin() && gameover();
     }
 
-    @Override
-    public int compareTo(GameState o) {
-        return numSteps + h();
+    public void setScore() {
+        this.score = this.numSteps + this.h();
+    }
+    public int getScore() {
+        return this.score;
     }
 
-    /*
-     * Heuristic function. For now, states with more cards
-     * in the foundation pile will receive lower (better) 
-     * scores
-     * 
-     * Other ideas:
-     *  - Variety of cards on bottom row of tableau
-     */
+    @Override
+    public int compareTo(GameState other) {
+        return this.score - other.getScore();
+    }
+
+
     public int h() {
-        int cardsAway = 0;
-        for (int f: foundations) {
-            cardsAway += f;
+        
+        int heuristicScore = 52;
+        for (int i = 1; i < foundations.length; i++) {
+            heuristicScore -= foundations[i];
         }
-        return (52 - cardsAway) * 10;
+
+        return heuristicScore;
+    }
+
+    public int singleCycleCount() {
+        ArrayList<Card> relevantCards = new ArrayList<Card>();
+
+        for (int cascadeNumber = 1; cascadeNumber < tableau.size(); cascadeNumber++) {
+            ArrayList<Card> cascade = tableau.get(cascadeNumber);
+            for (int cardXNumber = 0; cardXNumber < cascade.size(); cardXNumber++) {
+                Card cardX = cascade.get(cardXNumber);
+                for (int cardYNumber = cardXNumber+1; cardYNumber < cascade.size(); cardYNumber++) {
+                    Card cardY = cascade.get(cardYNumber);
+                    if (cardY.getSuit() == cardX.getSuit() && cardY.getRank() <= cardX.getRank()) {
+                        if (!relevantCards.contains(cardY)) relevantCards.add(cardY);
+                    }
+                }
+            }
+        }
+        return relevantCards.size();
     }
 
     public int getNumSteps() {
-        return numSteps;
+        return this.numSteps;
     }
+
+    
 }
