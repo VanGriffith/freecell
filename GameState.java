@@ -371,7 +371,7 @@ public class GameState implements Comparable<GameState>
     public int singleCycleCount() {
         ArrayList<Card> relevantCards = new ArrayList<Card>();
 
-        for (int cascadeNumber = 1; cascadeNumber < tableau.size(); cascadeNumber++) {
+        for (int cascadeNumber = 0; cascadeNumber < tableau.size(); cascadeNumber++) {
             ArrayList<Card> cascade = tableau.get(cascadeNumber);
             for (int cardXNumber = 0; cardXNumber < cascade.size(); cardXNumber++) {
                 Card cardX = cascade.get(cardXNumber);
