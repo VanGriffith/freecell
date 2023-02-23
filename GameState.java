@@ -346,8 +346,9 @@ public class GameState implements Comparable<GameState>
     }
 
     public void setScore() {
-        this.score = this.numSteps + this.h();
+        this.score = this.numSteps + h();
     }
+    
     public int getScore() {
         return this.score;
     }
@@ -357,7 +358,6 @@ public class GameState implements Comparable<GameState>
         return this.score - other.getScore();
     }
 
-
     public int h() {
         
         int heuristicScore = 52;
@@ -365,30 +365,66 @@ public class GameState implements Comparable<GameState>
             heuristicScore -= foundations[i];
         }
 
-        return heuristicScore;
+        ArrayList<Card> blockers = new ArrayList<Card>();
+        singlePileBlockers(blockers);
+        doublePileBlockers(blockers);
+
+        return heuristicScore + blockers.size();
     }
 
-    public int singleCycleCount() {
-        ArrayList<Card> relevantCards = new ArrayList<Card>();
+    public void singlePileBlockers(ArrayList<Card> blockers) {
+        for (ArrayList<Card> cascade: tableau) {
+            for (int topPos = 0; topPos < cascade.size(); topPos++) {
+                Card topCard = cascade.get(topPos);
 
-        for (int cascadeNumber = 0; cascadeNumber < tableau.size(); cascadeNumber++) {
-            ArrayList<Card> cascade = tableau.get(cascadeNumber);
-            for (int cardXNumber = 0; cardXNumber < cascade.size(); cardXNumber++) {
-                Card cardX = cascade.get(cardXNumber);
-                for (int cardYNumber = cardXNumber+1; cardYNumber < cascade.size(); cardYNumber++) {
-                    Card cardY = cascade.get(cardYNumber);
-                    if (cardY.getSuit() == cardX.getSuit() && cardY.getRank() <= cardX.getRank()) {
-                        if (!relevantCards.contains(cardY)) relevantCards.add(cardY);
+                for (int bottomPos = topPos + 1; bottomPos < cascade.size(); bottomPos++) {
+                    Card bottomCard = cascade.get(bottomPos);
+
+                    if (topCard.getSuit() == bottomCard.getSuit() && topCard.getRank() < bottomCard.getRank()) {
+                        if (!blockers.contains(bottomCard)) blockers.add(bottomCard);
+
                     }
                 }
             }
         }
-        return relevantCards.size();
+    }
+
+    public void doublePileBlockers(ArrayList<Card> blockers) {
+
+        for (int pileOneIndex = 0; pileOneIndex < tableau.size(); pileOneIndex++) {
+            ArrayList<Card> pileOne = tableau.get(pileOneIndex);
+            if (pileOne.size() < 2) continue;
+
+            for (int pileTwoIndex = 0; pileTwoIndex < tableau.size(); pileTwoIndex++) {
+                ArrayList<Card> pileTwo = tableau.get(pileTwoIndex);
+                if (pileTwoIndex == pileOneIndex || pileTwo.size() < 2) continue;
+
+                for (int c1Index = 1; c1Index < pileOne.size(); c1Index++) { 
+                    Card c1 = pileOne.get(c1Index);
+
+                    for (int c2Index = pileTwo.size() - 2; c2Index >= 0; c2Index--) {
+                        Card c2 = pileTwo.get(c2Index);
+                        if (c2.getSuit() != c1.getSuit() || c2.getRank() > c1.getRank()) continue;
+
+                        for (int c3Index = c2Index + 1; c3Index < pileTwo.size(); c3Index++) {
+                            Card c3 = pileTwo.get(c3Index);
+
+                            for (int c4Index = c1Index - 1; c4Index >= 0; c4Index--) {
+                                Card c4 = pileOne.get(c4Index);
+
+                                if (c4.getSuit() != c3.getSuit() || c4.getRank() > c3.getRank() || 
+                                    blockers.contains(c1)) continue;
+                                blockers.add(c1);
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public int getNumSteps() {
         return this.numSteps;
     }
-
-    
 }
