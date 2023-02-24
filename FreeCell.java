@@ -47,9 +47,10 @@ public class FreeCell
                     }
                 }
             }
+            System.out.println("Solution not found :(\nReturning empty ArrayList");
             return new ArrayList<Action>();
         } catch (OutOfMemoryError e) {
-            System.err.println("Out of Memory :(");
+            System.err.println("OutOfMemory :(\nReturning empty ArrayList");
             return new ArrayList<Action>();
         }
     }
