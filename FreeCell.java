@@ -43,7 +43,8 @@ public class FreeCell
                 else {
                     ArrayList<Action> actions = gs.getLegalActions();
                     for (Action a: actions) {
-                        pQueue.offer(gs.nextState(a));
+                        GameState nexState = gs.nextState(a);
+                        if(!pQueue.contains(nexState)) pQueue.offer(nexState);
                     }
                 }
             }

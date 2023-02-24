@@ -375,6 +375,7 @@ public class GameState implements Comparable<GameState>
         ArrayList<Card> blockers = new ArrayList<Card>();
         singlePileBlockers(blockers);
         doublePileBlockers(blockers);
+        //triplePileBlockers(blockers);
 
         return heuristicScore + blockers.size();
     }
@@ -408,26 +409,101 @@ public class GameState implements Comparable<GameState>
 
                 for (int c1Index = 1; c1Index < pileOne.size(); c1Index++) { 
                     Card c1 = pileOne.get(c1Index);
+                    if (blockers.contains(c1)) continue;
 
                     for (int c2Index = pileTwo.size() - 2; c2Index >= 0; c2Index--) {
                         Card c2 = pileTwo.get(c2Index);
+                        if (blockers.contains(c1)) break;
                         if (c2.getSuit() != c1.getSuit() || c2.getRank() > c1.getRank()) continue;
 
                         for (int c3Index = c2Index + 1; c3Index < pileTwo.size(); c3Index++) {
+                            if (blockers.contains(c1)) break;
                             Card c3 = pileTwo.get(c3Index);
 
                             for (int c4Index = c1Index - 1; c4Index >= 0; c4Index--) {
                                 Card c4 = pileOne.get(c4Index);
 
-                                if (c4.getSuit() != c3.getSuit() || c4.getRank() > c3.getRank() || 
-                                    blockers.contains(c1)) continue;
-                                blockers.add(c1);
-
+                                if (c4.getSuit() != c3.getSuit() || c4.getRank() > c3.getRank()) continue;
+                                if (!blockers.contains(c1)) blockers.add(c1);
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    /* 
+    public void triplePileBlockers(ArrayList<Card> blockers) {
+        for (int pileOneIndex = 0; pileOneIndex < tableau.size(); pileOneIndex++) {
+            ArrayList<Card> pileOne = tableau.get(pileOneIndex);
+            if (pileOne.size() < 2) continue;
+
+            for (int pileTwoIndex = 0; pileTwoIndex < tableau.size(); pileTwoIndex++) {
+                ArrayList<Card> pileTwo = tableau.get(pileTwoIndex);
+                if (pileTwoIndex == pileOneIndex || pileTwo.size() < 2) continue;
+
+                for (int pileThreeIndex = 0; pileThreeIndex < tableau.size(); pileThreeIndex++) {
+                    ArrayList<Card> pileThree = tableau.get(pileThreeIndex);
+                    if (pileThreeIndex == pileOneIndex || pileThreeIndex == pileTwoIndex || pileThree.size() < 2) continue;
+
+                    for (int c1Index = 1; c1Index < pileOne.size(); c1Index++) {
+                        Card c1 = pileOne.get(c1Index);
+                        if (blockers.contains(c1)) continue;
+
+                        for (int c2Index = pileTwo.size() - 2; c2Index >= 0; c2Index--) {
+                            if (blockers.contains(c1)) break;
+                            Card c2 = pileTwo.get(c2Index);
+                            if (c2.getSuit() != c1.getSuit() || c2.getRank() > c1.getRank()) continue;
+
+                            for (int c3Index = c2Index + 1; c3Index < pileTwo.size(); c3Index++) {
+                                if (blockers.contains(c1)) break;
+                                Card c3 = pileTwo.get(c3Index);
+
+                                for (int c4Index = pileThree.size() - 2; c4Index >= 0; c4Index--) {
+                                    if (blockers.contains(c1)) break;
+                                    Card c4 = pileThree.get(c4Index);
+                                    if (c4.getSuit() != c3.getSuit() || c4.getRank() > c3.getRank()) continue;
+
+                                    for (int c5Index = c4Index + 1; c5Index < pileThree.size(); c5Index++) {
+                                        if (blockers.contains(c1)) break;
+                                        Card c5 = pileThree.get(c5Index);
+
+                                        for (int c6Index = c1Index - 1; c6Index >= 0; c6Index--) {
+                                            if (blockers.contains(c1)) break;
+                                            Card c6 = pileOne.get(c6Index);
+
+                                            if (c6.getSuit() != c5.getSuit() || c6.getRank() > c5.getRank()) continue;
+                                            if (!blockers.contains(c1)) blockers.add(c1);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    */
+    
+    @Override
+    public boolean equals(Object o) {
+        GameState other = (GameState) o;
+
+        if (other.score != this.score) return false;
+        if (tableau.size() != other.tableau.size()) return false;
+
+        for (int pileIndex = 0; pileIndex < tableau.size(); pileIndex++) {
+            ArrayList<Card> pile = tableau.get(pileIndex);
+            ArrayList<Card> otherPile = other.tableau.get(pileIndex);
+            if (pile.size() != otherPile.size()) return false;
+
+            for (int cardIndex = 0; cardIndex < pile.size(); cardIndex++) {
+                if (!pile.get(cardIndex).equals(otherPile.get(cardIndex))) return false;
+            }
+        }
+
+        return true;
     }
 }
