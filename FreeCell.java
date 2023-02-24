@@ -25,7 +25,7 @@ public class FreeCell
         }
         
         game.display();
-        System.out.println("\nSolving...\n");
+        System.out.println("\nSolving...");
         
         try {
             Action.dumpToFile(solve(game), "actions.txt");
