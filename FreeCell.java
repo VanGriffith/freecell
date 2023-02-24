@@ -26,32 +26,31 @@ public class FreeCell
         
         game.display();
         System.out.println("\nSolving...");
-        
-        try {
-            Action.dumpToFile(solve(game), "actions.txt");
-        } catch (OutOfMemoryError e) {
-            System.err.println("Out of Memory :(");
-        }
+        Action.dumpToFile(solve(game), "actions.txt");
     }
 
     public static ArrayList<Action> solve(GameState start) {
         PriorityQueue<GameState> pQueue = new PriorityQueue<GameState>();
         pQueue.offer(start);
-        
-        while (!pQueue.isEmpty()) {
-            GameState gs = pQueue.poll();
-            if (gs.isWin()) {
-                ArrayList<Action> actions = gs.returnedActions;
-                System.out.printf("You won in %d moves!%n", actions.size());
-                return actions;
-            }
-            else {
-                ArrayList<Action> actions = gs.getLegalActions();
-                for (Action a: actions) {
-                    pQueue.offer(gs.nextState(a));
+        try {
+            while (!pQueue.isEmpty()) {
+                GameState gs = pQueue.poll();
+                if (gs.isWin()) {
+                    ArrayList<Action> actions = gs.returnedActions;
+                    System.out.printf("You won in %d moves!%n", actions.size());
+                    return actions;
+                }
+                else {
+                    ArrayList<Action> actions = gs.getLegalActions();
+                    for (Action a: actions) {
+                        pQueue.offer(gs.nextState(a));
+                    }
                 }
             }
+            return new ArrayList<Action>();
+        } catch (OutOfMemoryError e) {
+            System.err.println("Out of Memory :(");
+            return new ArrayList<Action>();
         }
-        return null;
     }
 }
