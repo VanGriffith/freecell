@@ -9,8 +9,8 @@ import java.io.FileWriter;
 /**
  * Contains the state of a FreeCell game
  *
- * @author Dan DiTursi
- * @version 11 February 2023
+ * @author Dan DiTursi, Van Griffith
+ * @version 23 February 2023
  */
 public class GameState implements Comparable<GameState>
 {

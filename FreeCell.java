@@ -5,8 +5,8 @@ import java.util.PriorityQueue;
 /**
  * Driver class for the Freecell game.
  *
- * @author Dan DiTursi
- * @version 4 February 2023
+ * @author Dan DiTursi, Van Griffith
+ * @version 23 February 2023
  */
 public class FreeCell
 {
