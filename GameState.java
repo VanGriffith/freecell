@@ -19,14 +19,15 @@ public class GameState implements Comparable<GameState>
     private int numCellsFree;
     private ArrayList<ArrayList<Card>> tableau; // In actions, numbered 1-8; we adjust the -1 manually.
     private int[] foundations = {0,0,0,0,0}; // We'll ignore the first one.
-    private int numSteps = 0;
     private int score;
+    ArrayList<Action> returnedActions;
 
     /**
      * Creates a random deal
      */
     public GameState()
     {
+        returnedActions = new ArrayList<Action>(1);
         cells = new ArrayList<Card>(4);
         numCellsFree = 4;
         tableau = new ArrayList<ArrayList<Card>>(8);
@@ -55,18 +56,23 @@ public class GameState implements Comparable<GameState>
     public GameState(GameState gs) {
         cells = new ArrayList<Card>(4);
         for (Card c : gs.cells) { cells.add(c); }
+        
         numCellsFree = gs.numCellsFree;
-        numSteps = gs.numSteps;
         tableau = new ArrayList<ArrayList<Card>>(8);
+        
         for (int i = 0; i < 8; i++) {
             ArrayList<Card> current = new ArrayList<Card>();
             ArrayList<Card> pile = gs.tableau.get(i);
             for (Card c : pile) { current.add(c); }
             tableau.add(current);
         }
+
         for (int i = 0; i < 5; i++) {
             foundations[i] = gs.foundations[i];
         }
+        
+        returnedActions = new ArrayList<Action>(gs.returnedActions.size() + 1);
+        returnedActions.addAll(gs.returnedActions);
 
         this.setScore();
     }
@@ -103,6 +109,7 @@ public class GameState implements Comparable<GameState>
             }
             tableau.add(pile);
         }
+        returnedActions = new ArrayList<Action>(1);
         this.setScore();
         sc.close();
     }
@@ -131,7 +138,7 @@ public class GameState implements Comparable<GameState>
             ArrayList<Card> p2 = tableau.get(d-1);
             p2.add(c);
         }
-        numSteps++;
+        this.returnedActions.add(a);
         this.setScore();
 
         return true;
@@ -346,7 +353,7 @@ public class GameState implements Comparable<GameState>
     }
 
     public void setScore() {
-        this.score = this.numSteps + h();
+        this.score = this.returnedActions.size() + h();
     }
     
     public int getScore() {
@@ -422,9 +429,5 @@ public class GameState implements Comparable<GameState>
                 }
             }
         }
-    }
-
-    public int getNumSteps() {
-        return this.numSteps;
     }
 }
